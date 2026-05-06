@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewData["Title"] = "Prijava";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 card shadow p-4">
+            <h2 class="text-center mb-4">Prijava</h2>
+            <form asp-action="Prijava" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Email adresa</label>
+                    <input type="email" class="form-control" placeholder="ime@primjer.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Lozinka</label>
+                    <input type="password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Prijavi se</button>
+
+                
+                <div class="mt-3 text-center">
+                    
+                    <p class="small">Nemate račun? <a asp-controller="Home" asp-action="Registracija">Registrirajte se ovdje</a></p>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

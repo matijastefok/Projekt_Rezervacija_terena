@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Rezervacija Termina";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Detalji rezervacije</h4>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Odaberi sport</label>
+                            <select class="form-select">
+                                <option>Tenis</option>
+                                <option>Nogomet</option>
+                                <option>Košarka</option>
+                                <option>Stolni tenis</option>
+                                <option>Odbojka</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Datum termina</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Vrijeme (sati)</label>
+                            <input type="time" class="form-control">
+                        </div>
+                        <div class="alert alert-info">
+                            Ukupno za platiti: <strong>12.00 €</strong>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Potvrdi rezervaciju</button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-link w-100 mt-2 text-muted">Odustani</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

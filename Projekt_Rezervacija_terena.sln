@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36203.30 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projekt_Rezervacija_terena", "Projekt_Rezervacija_terena\Projekt_Rezervacija_terena.csproj", "{6C610F34-F6AB-4CC6-83E9-E2159972D456}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C610F34-F6AB-4CC6-83E9-E2159972D456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C610F34-F6AB-4CC6-83E9-E2159972D456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C610F34-F6AB-4CC6-83E9-E2159972D456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C610F34-F6AB-4CC6-83E9-E2159972D456}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96D398DC-4FD6-4F36-9C20-221ED07BF053}
+	EndGlobalSection
+EndGlobal

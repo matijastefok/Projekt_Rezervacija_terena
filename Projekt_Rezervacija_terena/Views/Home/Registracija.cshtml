@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Projekt_Rezervacija_terena.Models.Korisnik
+
+@{
     ViewData["Title"] = "Registracija";
 }
 
@@ -7,24 +9,30 @@
         <div class="col-md-5 card shadow p-4">
             <h2 class="text-center mb-4">Registracija korisnika</h2>
             <form asp-action="Registracija" method="post">
+
                 <div class="mb-3">
                     <label class="form-label">Ime i prezime</label>
-                    <input type="text" class="form-control" placeholder="Unesite vaše ime">
+                    <input asp-for="Ime" type="text" class="form-control" placeholder="Unesite vaše ime">
+                    <span asp-validation-for="Ime" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Email adresa</label>
-                    <input type="email" class="form-control" placeholder="ime@primjer.com">
+                    <input asp-for="Email" type="email" class="form-control" placeholder="ime@primjer.com">
+                    <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Lozinka</label>
-                        <input type="password" class="form-control">
+                        <input asp-for="Lozinka" type="password" class="form-control">
+                        <span asp-validation-for="Lozinka" class="text-danger small"></span>
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Potvrda lozinke</label>
-                        <input type="password" class="form-control">
+                        <input asp-for="PonovljenaLozinka" type="password" class="form-control">
+                        <span asp-validation-for="PonovljenaLozinka" class="text-danger small"></span>
                     </div>
                 </div>
 
@@ -39,3 +47,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Projekt_Rezervacija_terena.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class DodanaTablicaKorisnici : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -42,7 +42,7 @@ namespace Projekt_Rezervacija_terena.Migrations
                 });
         }
 
-        /// <inheritdoc />
+         
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

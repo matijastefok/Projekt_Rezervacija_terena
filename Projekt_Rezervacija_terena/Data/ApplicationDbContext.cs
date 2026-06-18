@@ -13,7 +13,7 @@ namespace Projekt_Rezervacija_terena.Data
 
         public DbSet<Rezervacija> Rezervacije { get; set; }
 
-        // DODAJ OVU LINIJU ISPOD:
+        
         public DbSet<Korisnik> Korisnici { get; set; }
     }
 }

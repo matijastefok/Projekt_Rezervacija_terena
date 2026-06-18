@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Projekt_Rezervacija_terena.Data; // Poveznica s bazom podataka
+using Projekt_Rezervacija_terena.Data;
 using Projekt_Rezervacija_terena.Models;
 using System.Diagnostics;
 
@@ -8,68 +8,101 @@ namespace Projekt_Rezervacija_terena.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context; // Varijabla za bazu podataka
+        private readonly ApplicationDbContext _context;
 
-        // Konstruktor kroz koji ubacujemo logger i našu bazu podataka
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
             _context = context;
         }
 
-        // 1. POČETNA STRANICA
+        // 1. POČETNA STRANICA - Prikazuje rezervacije samo za prijavljenog korisnika
         public IActionResult Index()
         {
-            return View();
+            var prijavljeniKorisnik = HttpContext.Session.GetString("KorisnikIme");
+
+            if (string.IsNullOrEmpty(prijavljeniKorisnik))
+            {
+                return View(new List<Rezervacija>());
+            }
+
+            var korisnikoveRezervacije = _context.Rezervacije
+                                                 .Where(r => r.KorisnikIme == prijavljeniKorisnik)
+                                                 .ToList();
+
+            return View(korisnikoveRezervacije);
         }
 
-        // 2. PRIJAVA (Prikaz stranice)
+        // 2. ADMIN PANEL - Vidljiv samo ako je prijavljen admin
+        public IActionResult Admin()
+        {
+            var prijavljeniEmail = HttpContext.Session.GetString("KorisnikEmail");
+
+            // Ovdje definiramo tko ima pravo pristupa Admin Panelu
+            if (string.IsNullOrEmpty(prijavljeniEmail) || prijavljeniEmail != "admin@primjer.com")
+            {
+                TempData["Greska"] = "Nemate ovlasti za pristup Admin Panelu!";
+                return RedirectToAction("Index");
+            }
+
+            // Admin povlači APSOLUTNO SVE rezervacije iz baze podataka
+            var sveRezervacije = _context.Rezervacije.ToList();
+            return View(sveRezervacije);
+        }
+
         public IActionResult Prijava()
         {
             return View();
         }
 
-        // 2. PRIJAVA (Akcija kada korisnik klikne gumb za prijavu)
+        // 3. PRIJAVA - Dodano spremanje Emaila u sesiju radi provjere admina
         [HttpPost]
         public IActionResult Prijava(string email, string lozinka)
         {
-            // 1. Prvo tražimo postoji li uopće korisnik s tim emailom
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(lozinka))
+            {
+                ViewBag.Greska = "Molimo unesite email i lozinku!";
+                return View();
+            }
+
+            if (!email.Contains("@"))
+            {
+                ViewBag.Greska = "Molimo unesite ispravnu email adresu (npr. ime@primjer.com).";
+                return View();
+            }
+
             var korisnik = _context.Korisnici.FirstOrDefault(k => k.Email == email);
 
             if (korisnik == null)
             {
-                // Ako email ne postoji u bazi, ispisujemo jasnu poruku
                 ViewBag.Greska = "Korisnik s ovom email adresom nije registriran.";
                 return View();
             }
 
-            // 2. Ako korisnik postoji, provjeravamo poklapa li se lozinka
             if (korisnik.Lozinka != lozinka)
             {
-                // Ako je lozinka kriva, javljamo točnu grešku
                 ViewBag.Greska = "Kriva lozinka. Pokušajte ponovno.";
                 return View();
             }
 
-            // 3. Ako je sve točno, spremamo poruku i šaljemo korisnika na početnu stranicu (Index)
+            // U sesiju spremamo i Ime i Email
             HttpContext.Session.SetString("KorisnikIme", korisnik.Ime);
+            HttpContext.Session.SetString("KorisnikEmail", korisnik.Email);
+
             TempData["Poruka"] = $"Uspješno ste se prijavili kao {korisnik.Ime}!";
             return RedirectToAction("Index");
         }
 
-        // 3. REGISTRACIJA (Prikaz stranice)
         public IActionResult Registracija()
         {
             return View();
         }
 
-        // 3. REGISTRACIJA (Akcija kada korisnik klikne gumb za registraciju)
         [HttpPost]
         public IActionResult Registracija(Korisnik noviKorisnik)
         {
             if (ModelState.IsValid)
             {
-                // Provjera postoji li već netko s tim emailom u bazi
                 var postoji = _context.Korisnici.Any(k => k.Email == noviKorisnik.Email);
                 if (postoji)
                 {
@@ -77,7 +110,6 @@ namespace Projekt_Rezervacija_terena.Controllers
                     return View(noviKorisnik);
                 }
 
-                // Spremanje novog korisnika u bazu podataka
                 _context.Korisnici.Add(noviKorisnik);
                 _context.SaveChanges();
 
@@ -85,33 +117,78 @@ namespace Projekt_Rezervacija_terena.Controllers
                 return RedirectToAction("Prijava");
             }
 
-            // Ako validacija modela nije prošla (npr. lozinke se ne podudaraju), vraćamo formu s greškama
             return View(noviKorisnik);
         }
 
-        // 4. O PROJEKTU (Privacy)
         public IActionResult Privacy()
         {
             return View();
         }
 
-        // 5. REZERVACIJA TERENA (Akcija kada korisnik sprema rezervaciju)
+        // 5. REZERVACIJA TERENA
         [HttpPost]
         public IActionResult Rezerviraj(Rezervacija model)
         {
+            var prijavljeniKorisnik = HttpContext.Session.GetString("KorisnikIme");
+
+            if (string.IsNullOrEmpty(prijavljeniKorisnik))
+            {
+                TempData["Greska"] = "Morate se prijaviti da biste rezervirali teren!";
+                return RedirectToAction("Prijava");
+            }
+
+            if (model.Datum == DateTime.MinValue || model.Vrijeme == TimeSpan.Zero || string.IsNullOrEmpty(model.Sport))
+            {
+                TempData["Greska"] = "Molimo odaberite točan datum i vrijeme termina!";
+                return RedirectToAction("Index");
+            }
+
+            model.KorisnikIme = prijavljeniKorisnik;
+
             _context.Rezervacije.Add(model);
-            _context.SaveChanges(); // Spremanje u bazu podataka
+            _context.SaveChanges();
 
             TempData["Poruka"] = "Uspješno ste rezervirali termin!";
             return RedirectToAction("Index");
         }
 
-        // 6. ODJAVA KORISNIKA (Brisanje sesije)
+        // 6. KORISNIČKO OTKAZIVANJE REZERVACIJE
+        [HttpPost]
+        public IActionResult OtvaziRezervaciju(int id)
+        {
+            var rezervacija = _context.Rezervacije.Find(id);
+
+            if (rezervacija != null)
+            {
+                _context.Rezervacije.Remove(rezervacija);
+                _context.SaveChanges();
+                TempData["Poruka"] = "Uspješno ste otkazali termin!";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+       
+        [HttpPost]
+        public IActionResult OtkaziBiloKojuRezervaciju(int id)
+        {
+            var rezervacija = _context.Rezervacije.Find(id);
+
+            if (rezervacija != null)
+            {
+                _context.Rezervacije.Remove(rezervacija);
+                _context.SaveChanges();
+                TempData["Poruka"] = "Rezervacija uspješna uklonjena od strane administratora.";
+            }
+
+            return RedirectToAction("Admin");
+        }
+
         public IActionResult Odjava()
         {
-            HttpContext.Session.Clear(); // Briše sve podatke iz sesije (korisnik više nije prijavljen)
+            HttpContext.Session.Clear();
             TempData["Poruka"] = "Uspješno ste se odjavili.";
-            return RedirectToAction("Index"); // Vraća korisnika na početnu stranicu
+            return RedirectToAction("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

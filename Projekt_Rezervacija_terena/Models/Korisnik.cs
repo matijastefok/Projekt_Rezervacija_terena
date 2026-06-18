@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // DODANO: Potrebno za [NotMapped]
+using System.ComponentModel.DataAnnotations.Schema; 
 
 namespace Projekt_Rezervacija_terena.Models
 {
@@ -20,8 +20,8 @@ namespace Projekt_Rezervacija_terena.Models
         public string Lozinka { get; set; }
 
 
-        // --- OVDJE JE DODANO NOVO POLJE ZA PONOVLJENU LOZINKU ---
-        [NotMapped] // Govori bazi da ne stvara ovaj stupac u SQL-u
+        
+        [NotMapped]
         [Required(ErrorMessage = "Molimo ponovite lozinku.")]
         [DataType(DataType.Password)]
         [Compare("Lozinka", ErrorMessage = "Lozinke se ne podudaraju.")]

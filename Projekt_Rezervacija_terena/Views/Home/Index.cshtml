@@ -1,4 +1,4 @@
-﻿@model Projekt_Rezervacija_terena.Models.Rezervacija
+﻿@model IEnumerable<Projekt_Rezervacija_terena.Models.Rezervacija>
 
 @{
     ViewData["Title"] = "Početna - Rezervacija Sportskih Terena";
@@ -80,8 +80,18 @@
                     <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
                         <h5 class="text-muted mt-3">Administrator ste?</h5>
                         <p class="small text-muted">Upravljanje sportskim terenima.</p>
-                        <button class="btn btn-dark btn-sm px-4">Admin Panel</button>
+
+                        @if (Context.Session.GetString("KorisnikEmail") == "admin@primjer.com")
+                        {
+                            <a asp-action="Admin" class="btn btn-dark btn-sm px-4 shadow">Otvori Admin Panel</a>
+                        }
+                        else
+                        {
+                            <button onclick="alert('Morate se prijaviti s administratorskim računom (admin@primjer.com) da biste pristupili panelu.');" class="btn btn-secondary btn-sm px-4" disabled>Admin Panel</button>
+                        }
                     </div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>
@@ -96,18 +106,39 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sport</th>
-                                <th>Termin</th>
+                                <th>Datum</th>
+                                <th>Vrijeme</th>
                                 <th>Status</th>
                                 <th class="text-end">Akcija</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>Tenis</strong></td>
-                                <td>Subota, 18:00h</td>
-                                <td><span class="badge rounded-pill bg-success">Potvrđeno</span></td>
-                                <td class="text-end"><button class="btn btn-sm btn-outline-danger">Otkaži</button></td>
-                            </tr>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var rezervacija in Model)
+                                {
+                                    <tr>
+                                        <td><strong>@rezervacija.Sport</strong></td>
+                                        <td>@rezervacija.Datum.ToString("dd.MM.yyyy")</td>
+                                        <td>@rezervacija.Vrijeme.ToString(@"hh\:mm") h</td>
+                                        <td><span class="badge rounded-pill bg-success">Potvrđeno</span></td>
+                                        <td class="text-end">
+                                            <form asp-action="OtvaziRezervaciju" method="post" class="d-inline" onsubmit="return confirm('Jeste li sigurni da želite otkazati ovaj termin?');">
+                                                <input type="hidden" name="id" value="@rezervacija.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Otkaži</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">
+                                        Nemate aktivnih rezervacija.
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -124,22 +155,20 @@
                     <h3 class="mb-0 text-center">Nova rezervacija</h3>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Rezerviraj" method="post">
+                    <form asp-action="Rezerviraj" method="post" id="formaRezervacija" novalidate>
                         <div class="mb-3 text-center">
                             <h4 id="prikaz-sporta" class="text-primary fw-bold"></h4>
                             <input type="hidden" id="input-sport" name="Sport" />
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Datum" class="form-label">Datum termina</label>
-                            <input asp-for="Datum" type="date" class="form-control" required />
-                            <span asp-validation-for="Datum" class="text-danger"></span>
+                            <label class="form-label">Datum termina</label>
+                            <input name="Datum" id="datumInput" type="date" class="form-control" />
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Vrijeme" class="form-label">Odaberite vrijeme</label>
-                            <input asp-for="Vrijeme" type="time" class="form-control" required />
-                            <span asp-validation-for="Vrijeme" class="text-danger"></span>
+                            <label class="form-label">Odaberite vrijeme</label>
+                            <input name="Vrijeme" id="vrijemeInput" type="time" class="form-control" />
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 shadow">Potvrdi rezervaciju</button>
@@ -156,7 +185,6 @@
         document.getElementById('main-content').classList.add('d-none');
         document.getElementById('reservation-form').classList.remove('d-none');
 
-       
         document.getElementById('prikaz-sporta').innerText = "Teren: " + sport;
         document.getElementById('input-sport').value = sport;
 
@@ -167,4 +195,58 @@
         document.getElementById('main-content').classList.remove('d-none');
         document.getElementById('reservation-form').classList.add('d-none');
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var forma = document.getElementById("formaRezervacija");
+        var datumPolje = document.getElementById("datumInput");
+        var vrijemePolje = document.getElementById("vrijemeInput");
+
+        if (forma) {
+            forma.addEventListener("submit", function (event) {
+                var ispravno = true;
+
+                if (!datumPolje.value) {
+                    ispravno = false;
+                    prikažiGrešku(datumPolje, "datumGreska", "Upišite točan datum termina.");
+                }
+
+                if (!vrijemePolje.value) {
+                    ispravno = false;
+                    prikažiGrešku(vrijemePolje, "vrijemeGreska", "Upišite točno vrijeme termina.");
+                }
+
+                if (!ispravno) {
+                    event.preventDefault(); 
+                }
+            });
+        }
+
+        function prikažiGrešku(polje, greskaId, poruka) {
+            var staraPoruka = document.getElementById(greskaId);
+            if (!staraPoruka) {
+                var greskaNatpis = document.createElement("span");
+                greskaNatpis.id = greskaId;
+                greskaNatpis.style.color = "red";
+                greskaNatpis.style.display = "block";
+                greskaNatpis.style.marginTop = "5px";
+                greskaNatpis.style.fontSize = "14px";
+                greskaNatpis.innerText = poruka;
+                polje.parentNode.appendChild(greskaNatpis);
+            }
+        }
+
+        if (datumPolje) {
+            datumPolje.addEventListener("input", function () {
+                var staraPoruka = document.getElementById("datumGreska");
+                if (staraPoruka) staraPoruka.remove();
+            });
+        }
+
+        if (vrijemePolje) {
+            vrijemePolje.addEventListener("input", function () {
+                var staraPoruka = document.getElementById("vrijemeGreska");
+                if (staraPoruka) staraPoruka.remove();
+            });
+        }
+    });
 </script>

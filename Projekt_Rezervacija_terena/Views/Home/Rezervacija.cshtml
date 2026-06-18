@@ -24,12 +24,12 @@
 
                         <div class="mb-3">
                             <label class="form-label">Datum termina</label>
-                            <input type="date" class="form-control" id="datumInput" required />
+                            <input type="date" class="form-control" id="datumInput" />
                         </div>
 
                         <div class="form-group mb-3">
                             <label class="form-label">Odaberite vrijeme</label>
-                            <input type="time" class="form-control" id="vrijemeInput" required />
+                            <input type="time" class="form-control" id="vrijemeInput" />
                         </div>
 
                         <div class="alert alert-info">
@@ -54,26 +54,22 @@
             forma.addEventListener("submit", function (event) {
                 var ispravno = true;
 
-                // Provjera za Datum
                 if (!datumPolje.value) {
                     ispravno = false;
-                    prikažiGrešku(datumPolje, "datumGreska", "Molimo odaberite datum.");
+                    prikažiGrešku(datumPolje, "datumGreska", "Upišite točan datum termina.");
                 }
 
-                // Provjera za Vrijeme
                 if (!vrijemePolje.value) {
                     ispravno = false;
-                    prikažiGrešku(vrijemePolje, "vrijemeGreska", "Molimo odaberite vrijeme.");
+                    prikažiGrešku(vrijemePolje, "vrijemeGreska", "Upišite točno vrijeme termina.");
                 }
 
-                // Ako nešto nedostaje, zaustavi slanje forme prema serveru
                 if (!ispravno) {
                     event.preventDefault();
                 }
             });
         }
 
-        // Pomodne funkcije za prikaz i micanje grešaka na input
         function prikažiGrešku(polje, greskaId, poruka) {
             var staraPoruka = document.getElementById(greskaId);
             if (!staraPoruka) {
@@ -88,13 +84,11 @@
             }
         }
 
-        // Briši crvenu poruku čim korisnik unese vrijednost u Datum
         datumPolje.addEventListener("input", function () {
             var staraPoruka = document.getElementById("datumGreska");
             if (staraPoruka) staraPoruka.remove();
         });
 
-        // Briši crvenu poruku čim korisnik unese vrijednost u Vrijeme
         vrijemePolje.addEventListener("input", function () {
             var staraPoruka = document.getElementById("vrijemeGreska");
             if (staraPoruka) staraPoruka.remove();
